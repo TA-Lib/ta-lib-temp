@@ -434,6 +434,7 @@ def is_build_skipping_allowed(root_dir: str, asset_file_name: str, version: str,
 
     try:
         pdigest = PackageDigest.read_or_create(root_dir, asset_file_name, sources_digest, builder_id )
+        print(f"Info: {asset_file_name} digest file found pdigest={pdigest} sources_digest={sources_digest} builder_id={builder_id}")
         if pdigest.built_success and pdigest.sources_digest == sources_digest:
             # Double-check that the dist/ binaries still matches the MD5.
             local_asset_md5 = pdigest.calculate_md5()
