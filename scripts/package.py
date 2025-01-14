@@ -170,12 +170,14 @@ def package_windows_zip(root_dir: str, asset_file_name: str, version: str, sourc
     # Delete previous package digest files.
     digests_dir = os.path.join(dist_dir, 'digests')
     delete_other_versions(digests_dir, "*.digest", version)
-
+    
+    print(f"DEBUG Building is_build_skipping_allowed {asset_file_name}, {version}, {sources_digest}, {builder_id}...")
     if is_build_skipping_allowed(root_dir, asset_file_name, version, sources_digest, builder_id):
         result["build_valid"] = True
         result["existed"] = True
         result["copied"] = False
         return result
+    print(f"DEBUG Building allowed {asset_file_name}...")
 
     # Build the libraries
     build_dir = do_cmake_reconfigure(root_dir, '-G Ninja -DBUILD_DEV_TOOLS=OFF -DCMAKE_BUILD_TYPE=Release')
