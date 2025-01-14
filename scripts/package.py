@@ -648,7 +648,9 @@ def update_package_digest(root_dir: str, results: dict, sources_digest: str, bui
     #
     # The digest files are created in dists/digests directory.
     #
+    print(f"DEBUG 2: Updating digest file for {results['asset_file_name']}")
     if not results.get("processed",False):
+        print("DEBUG 2: Results not processed.") # Likely a bug.
         return # NOOP
 
     asset_file_name = results.get("asset_file_name","")
@@ -715,6 +717,13 @@ def update_package_digest(root_dir: str, results: dict, sources_digest: str, bui
                 print(f"Error: {asset_file_name} not successfully build.")
                 fatal_error = True
 
+    
+    git_user_name = get_git_user_name()
+    # If a github action, then the digest file should be updated to reflect that the git bot
+    # has process the package/digest.
+    if os.getenv('GITHUB_ACTIONS') == 'true':
+        pdigest.builder_id = git_user_name
+
     # Double check with some simple rules:
     #   - tests should never be "pass" if the build was not successful.
     #   - If a digest says the build was successful, then the md5 and sources_digest should always match.
@@ -744,8 +753,11 @@ def update_package_digest(root_dir: str, results: dict, sources_digest: str, bui
         pdigest.clear_tests()
 
     if pdigest != pdigest_copy:
-        print(f"Info: {asset_file_name} digest file updated.")
+        pdigest.builder_id = git_user_name
+        print(f"Info: {asset_file_name} digest file updated by {git_user_name}")
         pdigest.write()
+    else:
+        print(f"DEBUG 2: {asset_file_name} digest file unchanged.")
 
     if fatal_error:
         sys.exit(1)
